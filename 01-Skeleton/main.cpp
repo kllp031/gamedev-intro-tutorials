@@ -14,6 +14,7 @@
 ================================================================ */
 
 #include <windows.h>
+
 #include <d3d10.h>
 #include <d3dx10.h>
 #include <vector>
@@ -28,6 +29,9 @@
 
 #define TEXTURE_PATH_BRICK L"brick.png"
 #define TEXTURE_PATH_MARIO L"mario.png"
+
+#define TEXTURE_PATH_SHIP L"Blue.png"
+#define TEXTURE_PATH_BULLET L"Ball.png"
 
 #define TEXTURE_PATH_MISC L"misc.png"
 
@@ -44,22 +48,47 @@ CMario *mario;
 #define MARIO_START_VX 0.1f
 #define MARIO_START_VY 0.1f
 
+CMario* ship;
+#define SHIP_START_X 10.0f
+#define SHIP_START_Y 180.0f
+#define SHIP_START_VX 0.1f
+#define SHIP_START_VY 0.1f
 
 CBrick *brick;
-#define BRICK_X 10.0f
+#define BRICK_X 8.0f
 #define BRICK_Y 120.0f
+
+#define BRICK_WIDTH 16.0f
 
 LPTEXTURE texMario = NULL;
 LPTEXTURE texBrick = NULL;
+LPTEXTURE texShip = NULL;
 LPTEXTURE texMisc = NULL;
+LPTEXTURE texBullet = NULL;
 
-//vector<LPGAMEOBJECT> objects;  
+// Store key states
+bool keyStates[256] = { false };
+bool keyPressed[256] = { false }; // To track keys that were just pressed
+bool keyHeld[256] = { false };    // To track keys being held down
+
+vector<LPGAMEOBJECT> objects;  
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
 	case WM_DESTROY:
 		PostQuitMessage(0);
+		break;
+	case WM_KEYDOWN:
+		if (!keyHeld[wParam]) {
+			keyPressed[wParam] = true;  // Key was just pressed
+		}
+		keyHeld[wParam] = true;         // Key is now being held
+		keyStates[wParam] = true;       // Keep your existing code
+		break;
+	case WM_KEYUP:
+		keyHeld[wParam] = false;        // Key is no longer held
+		keyStates[wParam] = false;      // Keep your existing code
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -75,26 +104,27 @@ void LoadResources()
 {
 	CGame * game = CGame::GetInstance();
 	texBrick = game->LoadTexture(TEXTURE_PATH_BRICK);
-	texMario = game->LoadTexture(TEXTURE_PATH_MARIO);
+	texShip = game->LoadTexture(TEXTURE_PATH_SHIP);
 	texMisc = game->LoadTexture(TEXTURE_PATH_MISC);
+	texBullet = game->LoadTexture(TEXTURE_PATH_BULLET);
 
 	// Load a sprite sheet as a texture to try drawing a portion of a texture. See function Render 
 	//texMisc = game->LoadTexture(MISC_TEXTURE_PATH);
 
-	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX, MARIO_START_VY, texMario);
+	ship = new CMario(SHIP_START_X, SHIP_START_Y, SHIP_START_VX, SHIP_START_VY, texShip);
 	brick = new CBrick(BRICK_X, BRICK_Y, texBrick);
 
-	
-	// objects.push_back(mario);
-	// for(i)		 
-	//		objects.push_back(new CGameObject(BRICK_X+i*BRICK_WIDTH,....);
-	//
 
-	//
-	// int x = BRICK_X;
-	// for(i)
-	//		... new CGameObject(x,.... 
-	//		x+=BRICK_WIDTH;
+	objects.push_back(ship);
+	for(int i = 0; i < 20; i++)		 
+		objects.push_back(new CBrick(BRICK_X+i*BRICK_WIDTH, BRICK_Y, texBrick));
+	
+
+	
+	//int x = BRICK_X;
+	//for(i)
+	//	... new CGameObject(x,.... 
+	//	x+=BRICK_WIDTH;
 }
 
 /*
@@ -103,13 +133,14 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
-	/*
-	for (int i=0;i<n;i++)
+	
+	
+	for (int i=0;i< objects.size();i++)
 		objects[i]->Update(dt);
-	*/
+	
 
-	mario->Update(dt);
-	brick->Update(dt);
+	ship->Update(dt, keyStates, keyPressed);
+	//brick->Update(dt);
 
 	//DebugOutTitle(L"01 - Skeleton %0.1f, %0.1f", mario->GetX(), mario->GetY());
 }
@@ -137,8 +168,11 @@ void Render()
 		FLOAT NewBlendFactor[4] = { 0,0,0,0 };
 		pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-		brick->Render();
-		mario->Render();
+		for (int i = 0; i < objects.size(); i++)
+			objects[i]->Render();
+
+		//brick->Render();
+		//mario->Render();
 
 		// Uncomment this line to see how to draw a porttion of a texture  
 		//g->Draw(10, 10, texMisc, 300, 117, 317, 134);

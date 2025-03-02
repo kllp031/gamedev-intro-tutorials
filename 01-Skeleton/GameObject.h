@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <Windows.h>
 #include <d3dx10.h>
 
@@ -35,15 +36,38 @@ public:
 	void Update(DWORD dt) {}; 
 };
 
+class CBullet : public CGameObject
+{
+public:
+	float vx;
+	float vy;
+	bool exist = true;
+
+	CBullet(float x, float y, float vx, float vy, LPTEXTURE texture)
+		: CGameObject(x, y, texture), vx(vx), vy(vy) {}
+
+	void Update(DWORD dt);
+	void Render();
+};
+
 class CMario : public CGameObject
 {
 	float vx;
 	float vy;
-public: 
-	CMario(float x, float y, float vx, float vy, LPTEXTURE texture) :CGameObject(x, y, texture)
+	std::vector<CBullet*> bullets; // Store bullets
+
+public:
+	CMario(float x, float y, float vx, float vy, LPTEXTURE texture)
+		: CGameObject(x, y, texture), vx(vx), vy(vy) {}
+
+	void Update(DWORD dt) override // Provide implementation for the pure virtual function
 	{
-		this->vx = vx;
-		this->vy = vy;
-	};
-	void Update(DWORD dt);
+		bool keyStates[256] = { false }; // Dummy keyStates array (replace with actual key input)
+		bool keyPressed[] = { false };
+		Update(dt, keyStates, keyPressed);
+	}
+	void Update(DWORD dt, bool keyStates[], bool keyPressed[]);
+	void Shoot(); // Function to shoot a bullet
+	void Render(); // Override render to draw bullets too
 };
+
