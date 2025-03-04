@@ -22,6 +22,10 @@
 #include "debug.h"
 #include "Game.h"
 #include "GameObject.h"
+#include "Brick.h"
+#include "Mario.h"
+#include "Bullet.h"
+#include "Enemy.h"
 
 #define WINDOW_CLASS_NAME L"Game Window"
 #define MAIN_WINDOW_TITLE L"01 - Skeleton"
@@ -47,22 +51,36 @@ CMario *mario;
 #define MARIO_START_Y 100.0f
 #define MARIO_START_VX 0.1f
 #define MARIO_START_VY 0.1f
+#define MARIO_WIDTH 14.0f
+#define MARIO_HEIGHT 20.f
 
 CMario* ship;
 #define SHIP_START_X 10.0f
 #define SHIP_START_Y 180.0f
 #define SHIP_START_VX 0.1f
 #define SHIP_START_VY 0.1f
+#define SHIP_WIDTH 14.0f
+#define SHIP_HEIGHT 5.f
 
 CBrick *brick;
 #define BRICK_X 8.0f
 #define BRICK_Y 120.0f
-
 #define BRICK_WIDTH 16.0f
+#define BRICK_HEIGHT 16.f
+
+CEnemy *enemy;
+#define ENEMY_START_X 10.0f
+#define ENEMY_START_Y 20.0f
+#define ENEMY_START_VX 0.1f
+#define ENEMY_START_VY 0.1f
+#define ENEMY_WIDTH 14.0f
+#define ENEMY_HEIGHT 20.f
+
 
 LPTEXTURE texMario = NULL;
 LPTEXTURE texBrick = NULL;
 LPTEXTURE texShip = NULL;
+LPTEXTURE texEnemy = NULL;
 LPTEXTURE texMisc = NULL;
 LPTEXTURE texBullet = NULL;
 
@@ -72,6 +90,8 @@ bool keyPressed[256] = { false }; // To track keys that were just pressed
 bool keyHeld[256] = { false };    // To track keys being held down
 
 vector<LPGAMEOBJECT> objects;  
+vector<LPGAMEOBJECT> objectsToDelete;
+
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -107,17 +127,20 @@ void LoadResources()
 	texShip = game->LoadTexture(TEXTURE_PATH_SHIP);
 	texMisc = game->LoadTexture(TEXTURE_PATH_MISC);
 	texBullet = game->LoadTexture(TEXTURE_PATH_BULLET);
+	texEnemy = game->LoadTexture(TEXTURE_PATH_MARIO);
 
 	// Load a sprite sheet as a texture to try drawing a portion of a texture. See function Render 
 	//texMisc = game->LoadTexture(MISC_TEXTURE_PATH);
 
-	ship = new CMario(SHIP_START_X, SHIP_START_Y, SHIP_START_VX, SHIP_START_VY, texShip);
-	brick = new CBrick(BRICK_X, BRICK_Y, texBrick);
+	ship = new CMario(SHIP_START_X, SHIP_START_Y, SHIP_WIDTH, SHIP_HEIGHT, SHIP_START_VX, SHIP_START_VY, texShip);
+	brick = new CBrick(BRICK_X, BRICK_Y, BRICK_WIDTH, BRICK_HEIGHT, texBrick);
+	enemy = new CEnemy(ENEMY_START_X, ENEMY_START_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_START_VX, ENEMY_START_VY, texEnemy);
 
 
 	objects.push_back(ship);
-	for(int i = 0; i < 20; i++)		 
-		objects.push_back(new CBrick(BRICK_X+i*BRICK_WIDTH, BRICK_Y, texBrick));
+	objects.push_back(enemy);
+	for(int i = 0; i < 0; i++)		 
+		objects.push_back(new CBrick(BRICK_X+i*BRICK_WIDTH, BRICK_Y, BRICK_WIDTH, BRICK_HEIGHT, texBrick));
 	
 
 	
@@ -131,18 +154,70 @@ void LoadResources()
 	Update world status for this frame
 	dt: time period between beginning of last frame and beginning of this frame
 */
-void Update(DWORD dt)
-{
-	
-	
-	for (int i=0;i< objects.size();i++)
-		objects[i]->Update(dt);
-	
+// In Update() function (in your main game file)
+void Update(DWORD dt) {
+	// Update all game objects
+	for (auto obj : objects) {
+		obj->Update(dt);
+	}
 
+	// Check for input
 	ship->Update(dt, keyStates, keyPressed);
-	//brick->Update(dt);
 
-	//DebugOutTitle(L"01 - Skeleton %0.1f, %0.1f", mario->GetX(), mario->GetY());
+	// Check for bullet collision
+	for (int i = 0; i < ship->bullets.size(); i++) {
+		for (auto obj : objects) {
+			if (ship->bullets[i]->CheckCollision(obj)) 
+			{
+				ship->bullets[i]->OnCollision(obj);
+				obj->OnCollision(ship->bullets[i]);
+
+				if (!ship->bullets[i]->exist) {
+					objectsToDelete.push_back(ship->bullets[i]);
+				}
+
+				CEnemy* enemy = dynamic_cast<CEnemy*>(obj);
+				if (enemy && !enemy->IsAlive()) {
+					objectsToDelete.push_back(enemy);
+				}
+			}
+		}
+	}
+
+	// Check for enemy bullet collision
+	for (int i = 0; i < enemy->bullets.size(); i++) {
+		for (auto obj : objects) {
+			if (enemy->bullets[i]->CheckCollision(obj))
+			{
+				enemy->bullets[i]->OnCollision(obj);
+				obj->OnCollision(enemy->bullets[i]);
+			}
+		}
+	}
+
+	// Check collisions
+	for (int i = 0; i < objects.size(); i++)
+	{
+		for (int j = i + 1; j < objects.size(); j++)
+		{
+			if (objects[i]->CheckCollision(objects[j]))
+			{
+				// Handle collision
+				objects[i]->OnCollision(objects[j]);
+				objects[j]->OnCollision(objects[i]);
+			}
+		}
+	}
+
+	//// AFTER all collision checking is done, remove dead objects
+	//for (auto obj : objectsToDelete) {
+	//	auto it = std::find(objects.begin(), objects.end(), obj);
+	//	if (it != objects.end()) {
+	//		objects.erase(it);
+	//	}
+	//	delete obj;
+	//}
+	//objectsToDelete.clear();
 }
 
 /*
