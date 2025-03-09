@@ -1,15 +1,13 @@
 #pragma once
-#include "GameObject.h"
+#include "moveableObject.h"
 
-class CBullet : public CGameObject
+class CBullet : public CMoveableObject
 {
 public:
-	float vx;
-	float vy;
 	bool exist = true;
 
 	CBullet(float x, float y, float width, float height, float vx, float vy, LPTEXTURE texture)
-		: CGameObject(x, y, width, height, texture), vx(vx), vy(vy) {}
+		: CMoveableObject(x, y, width, height, vx, vy, texture) {}
 	
 	void Update(DWORD dt) override;
 	void Render() override;

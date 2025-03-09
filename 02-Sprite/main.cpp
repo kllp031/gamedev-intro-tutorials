@@ -41,7 +41,7 @@
 #define ID_TEX_MISC 20
 
 #define TEXTURES_DIR L"textures"
-#define TEXTURE_PATH_MARIO TEXTURES_DIR "\\mario.png"
+#define TEXTURE_PATH_MARIO TEXTURES_DIR "\\mario_transparent.png"
 #define TEXTURE_PATH_MISC TEXTURES_DIR "\\misc_transparent.png"
 #define TEXTURE_PATH_ENEMIES TEXTURES_DIR "\\enemies.png"
 
@@ -82,12 +82,15 @@ void LoadResources()
 	
 	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
-	// readline => id, left, top, right 
+	// readline => id, left, top, right, bottom
 
+	//MARIO SPRITE
+	//move right sprites
 	sprites->Add(10001, 246, 154, 259, 181, texMario);
 	sprites->Add(10002, 275, 154, 290, 181, texMario);
 	sprites->Add(10003, 304, 154, 321, 181, texMario);
 
+	//move left sprites
 	sprites->Add(10011, 186, 154, 200, 181, texMario);
 	sprites->Add(10012, 155, 154, 171, 181, texMario);
 	sprites->Add(10013, 125, 154, 141, 181, texMario);
@@ -95,22 +98,21 @@ void LoadResources()
 	CAnimations * animations = CAnimations::GetInstance();
 	LPANIMATION ani;
 
+	//move right animation
 	ani = new CAnimation(100);
 	ani->Add(10001);
 	ani->Add(10002);
 	ani->Add(10003);
 	animations->Add(500, ani);
 
-
-
+	//move left aniamtion
 	ani = new CAnimation(100);
 	ani->Add(10011);
 	ani->Add(10012);
 	ani->Add(10013);
 	animations->Add(501, ani);
 
-
-
+	//BRICK SPRITE
 	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
 	sprites->Add(20001, 300, 117, 317, 133, texMisc);
 	sprites->Add(20002, 318, 117, 335, 133, texMisc);

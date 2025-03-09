@@ -26,6 +26,7 @@
 #include "Mario.h"
 #include "Bullet.h"
 #include "Enemy.h"
+#include "BulletManager.h"
 
 #define WINDOW_CLASS_NAME L"Game Window"
 #define MAIN_WINDOW_TITLE L"01 - Skeleton"
@@ -34,12 +35,16 @@
 #define TEXTURE_PATH_BRICK L"brick.png"
 #define TEXTURE_PATH_MARIO L"mario.png"
 
-#define TEXTURE_PATH_SHIP L"Blue.png"
-#define TEXTURE_PATH_BULLET L"Ball.png"
+//Ship texture
+#define TEXTURE_SHIP_UP L"Sprite\\tUp.png"
 
+//Enemy texture
+#define TEXTURE_ENEMY_DOWN L"Sprite\\Enemy\\wDown.png"
+
+#define TEXTURE_PATH_BULLET L"Ball.png"
 #define TEXTURE_PATH_MISC L"misc.png"
 
-#define BACKGROUND_COLOR D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.0f)
+#define BACKGROUND_COLOR D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f)
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
@@ -55,9 +60,9 @@ CMario *mario;
 #define MARIO_HEIGHT 20.f
 
 CMario* ship;
-#define SHIP_START_X 10.0f
+#define SHIP_START_X 50.0f
 #define SHIP_START_Y 180.0f
-#define SHIP_START_VX 0.1f
+#define SHIP_START_VX 0.0f
 #define SHIP_START_VY 0.1f
 #define SHIP_WIDTH 14.0f
 #define SHIP_HEIGHT 5.f
@@ -71,11 +76,10 @@ CBrick *brick;
 CEnemy *enemy;
 #define ENEMY_START_X 10.0f
 #define ENEMY_START_Y 20.0f
-#define ENEMY_START_VX 0.1f
-#define ENEMY_START_VY 0.1f
+#define ENEMY_START_VX 0.00f
+#define ENEMY_START_VY 0.05f
 #define ENEMY_WIDTH 14.0f
 #define ENEMY_HEIGHT 20.f
-
 
 LPTEXTURE texMario = NULL;
 LPTEXTURE texBrick = NULL;
@@ -89,8 +93,10 @@ bool keyStates[256] = { false };
 bool keyPressed[256] = { false }; // To track keys that were just pressed
 bool keyHeld[256] = { false };    // To track keys being held down
 
-vector<LPGAMEOBJECT> objects;  
+vector<LPGAMEOBJECT> objects;
+vector<LPGAMEOBJECT> objectsProjectile;
 vector<LPGAMEOBJECT> objectsToDelete;
+extern BulletManager bulletManager;
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -124,21 +130,23 @@ void LoadResources()
 {
 	CGame * game = CGame::GetInstance();
 	texBrick = game->LoadTexture(TEXTURE_PATH_BRICK);
-	texShip = game->LoadTexture(TEXTURE_PATH_SHIP);
+	texShip = game->LoadTexture(TEXTURE_SHIP_UP);
 	texMisc = game->LoadTexture(TEXTURE_PATH_MISC);
 	texBullet = game->LoadTexture(TEXTURE_PATH_BULLET);
-	texEnemy = game->LoadTexture(TEXTURE_PATH_MARIO);
+	texEnemy = game->LoadTexture(TEXTURE_ENEMY_DOWN);
 
 	// Load a sprite sheet as a texture to try drawing a portion of a texture. See function Render 
 	//texMisc = game->LoadTexture(MISC_TEXTURE_PATH);
 
 	ship = new CMario(SHIP_START_X, SHIP_START_Y, SHIP_WIDTH, SHIP_HEIGHT, SHIP_START_VX, SHIP_START_VY, texShip);
-	brick = new CBrick(BRICK_X, BRICK_Y, BRICK_WIDTH, BRICK_HEIGHT, texBrick);
-	enemy = new CEnemy(ENEMY_START_X, ENEMY_START_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_START_VX, ENEMY_START_VY, texEnemy);
-
 
 	objects.push_back(ship);
-	objects.push_back(enemy);
+
+	for (size_t i = 0; i < 8; i++)
+	{
+		objects.push_back(new CEnemy(ENEMY_START_X + i * 32.0f, ENEMY_START_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_START_VX, ENEMY_START_VY, texEnemy));
+	}
+
 	for(int i = 0; i < 0; i++)		 
 		objects.push_back(new CBrick(BRICK_X+i*BRICK_WIDTH, BRICK_Y, BRICK_WIDTH, BRICK_HEIGHT, texBrick));
 	
@@ -164,44 +172,65 @@ void Update(DWORD dt) {
 	// Check for input
 	ship->Update(dt, keyStates, keyPressed);
 
+	// Update bullets
+	bulletManager.Update(dt);
+
+	// Temporary vector to track bullets to remove
+	std::vector<CBullet*> bulletsToRemove;
+
 	// Check for bullet collision
-	for (int i = 0; i < ship->bullets.size(); i++) {
+	for (size_t i = 0; i < bulletManager.bullets.size(); i++) {
+		CBullet* bullet = bulletManager.bullets[i];
+
 		for (auto obj : objects) {
-			if (ship->bullets[i]->CheckCollision(obj)) 
-			{
-				ship->bullets[i]->OnCollision(obj);
-				obj->OnCollision(ship->bullets[i]);
+			if (bullet->CheckCollision(obj)) {
+				// Mark bullet for removal
+				bullet->exist = false;
+				bulletsToRemove.push_back(bullet);
 
-				if (!ship->bullets[i]->exist) {
-					objectsToDelete.push_back(ship->bullets[i]);
-				}
+				// Handle collision for the object
+				obj->OnCollision(bullet);
 
-				CEnemy* enemy = dynamic_cast<CEnemy*>(obj);
-				if (enemy && !enemy->IsAlive()) {
-					objectsToDelete.push_back(enemy);
-				}
+				//Check if the object is an enemy that died
+				//CEnemy* enemy = dynamic_cast<CEnemy*>(obj);
+				//if (enemy && !enemy->IsAlive()) {
+				//	objectsToDelete.push_back(enemy);
+				//}
+
+				// Break out of the inner loop once collision is detected
+				break;
 			}
 		}
 	}
 
-	// Check for enemy bullet collision
-	for (int i = 0; i < enemy->bullets.size(); i++) {
-		for (auto obj : objects) {
-			if (enemy->bullets[i]->CheckCollision(obj))
-			{
-				enemy->bullets[i]->OnCollision(obj);
-				obj->OnCollision(enemy->bullets[i]);
+	// Check for bullet-to-bullet collision
+	for (size_t i = 0; i < bulletManager.bullets.size(); i++) {
+		CBullet* bullet1 = bulletManager.bullets[i];
+		for (size_t j = i + 1; j < bulletManager.bullets.size(); j++) {
+			CBullet* bullet2 = bulletManager.bullets[j];
+			if (bullet1->CheckCollision(bullet2)) {
+				// Mark both bullets for removal
+				bullet1->exist = false;
+				bullet2->exist = false;
+				bulletsToRemove.push_back(bullet1);
+				bulletsToRemove.push_back(bullet2);
 			}
 		}
 	}
 
-	// Check collisions
-	for (int i = 0; i < objects.size(); i++)
-	{
-		for (int j = i + 1; j < objects.size(); j++)
-		{
-			if (objects[i]->CheckCollision(objects[j]))
-			{
+	// Remove bullets that had collisions
+	for (CBullet* bullet : bulletsToRemove) {
+		auto it = std::find(bulletManager.bullets.begin(), bulletManager.bullets.end(), bullet);
+		if (it != bulletManager.bullets.end()) {
+			bulletManager.bullets.erase(it);
+			delete bullet;
+		}
+	}
+
+	// Check collisions between other game objects
+	for (int i = 0; i < objects.size(); i++) {
+		for (int j = i + 1; j < objects.size(); j++) {
+			if (objects[i]->CheckCollision(objects[j])) {
 				// Handle collision
 				objects[i]->OnCollision(objects[j]);
 				objects[j]->OnCollision(objects[i]);
@@ -209,22 +238,18 @@ void Update(DWORD dt) {
 		}
 	}
 
-	//// AFTER all collision checking is done, remove dead objects
-	//for (auto obj : objectsToDelete) {
-	//	auto it = std::find(objects.begin(), objects.end(), obj);
-	//	if (it != objects.end()) {
-	//		objects.erase(it);
-	//	}
-	//	delete obj;
-	//}
-	//objectsToDelete.clear();
+	// AFTER all collision checking is done, remove dead objects
+	for (auto obj : objectsToDelete) {
+		auto it = std::find(objects.begin(), objects.end(), obj);
+		if (it != objects.end()) {
+			objects.erase(it);
+		}
+		delete obj;
+	}
+	objectsToDelete.clear();
 }
 
-/*
-	Render a frame 
-*/
-void Render()
-{
+void Render() {
 	CGame* g = CGame::GetInstance();
 
 	ID3D10Device* pD3DDevice = g->GetDirect3DDevice();
@@ -232,8 +257,7 @@ void Render()
 	ID3D10RenderTargetView* pRenderTargetView = g->GetRenderTargetView();
 	ID3DX10Sprite* spriteHandler = g->GetSpriteHandler();
 
-	if (pD3DDevice != NULL)
-	{
+	if (pD3DDevice != NULL) {
 		// clear the background 
 		pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
@@ -246,17 +270,16 @@ void Render()
 		for (int i = 0; i < objects.size(); i++)
 			objects[i]->Render();
 
-		//brick->Render();
-		//mario->Render();
-
-		// Uncomment this line to see how to draw a porttion of a texture  
-		//g->Draw(10, 10, texMisc, 300, 117, 317, 134);
-		//g->Draw(10, 10, texMario, 215, 120, 234, 137);
+		// Render bullets
+		bulletManager.Render();
 
 		spriteHandler->End();
 		pSwapChain->Present(0, 0);
 	}
 }
+
+
+
 
 HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int ScreenHeight)
 {

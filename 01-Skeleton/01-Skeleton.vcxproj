@@ -125,12 +125,15 @@
   <ItemGroup>
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="BulletManager.h" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mario.cpp" />
+    <ClCompile Include="moveableObject.cpp" />
+    <ClCompile Include="Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Brick.h" />
@@ -140,6 +143,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mario.h" />
+    <ClInclude Include="moveableObject.h" />
+    <ClInclude Include="Tank.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>

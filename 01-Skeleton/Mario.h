@@ -1,44 +1,45 @@
 #pragma once
-#include "GameObject.h"
+#include "Tank.h"
 #include "Bullet.h"
 #include <vector>
+#include <cstdlib> // For srand, rand
+#include <ctime>   // For time
 
-class CMario : public CGameObject
+#define SHIP_STATE_UP 1
+#define SHIP_STATE_DOWN 2
+#define SHIP_STATE_LEFT 3
+#define SHIP_STATE_RIGHT 4
+
+//Ship texture
+#define TEXTURE_SHIP_UP L"Sprite\\tUp.png"
+#define TEXTURE_SHIP_DOWN L"Sprite\\tDown.png"
+#define TEXTURE_SHIP_LEFT L"Sprite\\tLeft.png"
+#define TEXTURE_SHIP_RIGHT L"Sprite\\tRight.png"
+
+class CMario : public CTank
 {
-private:
-	float vx;
-	float vy;
-	bool isAlive;
-
 public:
-	std::vector<CBullet*> bullets; // Store bullets
+    CMario(float x, float y, float width, float height, float vx, float vy, LPTEXTURE texture)
+        : CTank(x, y, width, height, vx, vy, texture)
+    {
+        isAlive = true;
+        state = SHIP_STATE_UP;
 
-	CMario(float x, float y, float width, float height,float vx, float vy, LPTEXTURE texture)
-		: CGameObject(x, y, width, height, texture), vx(vx), vy(vy) 
-	{
-		isAlive = true;
+        CGame* game = CGame::GetInstance();
+        texTankUp = game->LoadTexture(TEXTURE_SHIP_UP);
+        texTankDown = game->LoadTexture(TEXTURE_SHIP_DOWN);
+        texTankLeft = game->LoadTexture(TEXTURE_SHIP_LEFT);
+        texTankRight = game->LoadTexture(TEXTURE_SHIP_RIGHT);
+    }
 
-		// Seed the random number generator (do this once in your game initialization)
-		// In actual practice, you'd do this in your main game initialization, not here
-		static bool seeded = false;
-		if (!seeded) {
-			srand(static_cast<unsigned int>(time(0)));
-			seeded = true;
-		}
-	}
+    void Update(DWORD dt) override; // Implement the pure virtual function
+    void Update(DWORD dt, bool keyStates[], bool keyPressed[]);
+    void Render() override; // Override render to draw bullets too
 
-	bool IsAlive() const { return isAlive; }
-	void Die();
-	void Respawn();
+    void Respawn() override;
 
-	bool CheckCollision(LPGAMEOBJECT other) override;
-	virtual Rect GetBounds() override;
-
-	void Update(DWORD dt) override; // Implement the pure virtual function
-	void Update(DWORD dt, bool keyStates[], bool keyPressed[]);
-	void Shoot(); // Function to shoot a bullet
-	void Render() override; // Override render to draw bullets too
-
-	// Override collision handler
-	void OnCollision(LPGAMEOBJECT other) override;
+    bool CheckCollision(LPGAMEOBJECT other) override;
+    virtual Rect GetBounds() override;
+    // Override collision handler
+    void OnCollision(LPGAMEOBJECT other) override;
 };

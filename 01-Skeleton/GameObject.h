@@ -2,10 +2,12 @@
 #include <Windows.h>
 #include <d3dx10.h>
 #include "Texture.h"
+#include "debug.h"
 
 // Forward declaration
 class CGameObject;
-// Define the typedef early
+
+// Define the typedef 
 typedef CGameObject* LPGAMEOBJECT;
 
 // Define a simple rectangle structure for collision bounds
@@ -23,6 +25,8 @@ protected:
     LPTEXTURE texture;
 
 public:
+
+    CGameObject(float x = 0.0f, float y = 0.0f, int width = 0, int height = 0, LPTEXTURE texture = NULL);
 
     void SetPosition(float x, float y) { this->x = x, this->y = y; }
     float GetX() { return x; }
@@ -48,7 +52,7 @@ public:
 
     // Handle collision with another object
     virtual void OnCollision(LPGAMEOBJECT other) {}
-    CGameObject(float x = 0.0f, float y = 0.0f, int width = 0, int height = 0, LPTEXTURE texture = NULL);
+    
 
     virtual void Update(DWORD dt) = 0;
     virtual void Render();
