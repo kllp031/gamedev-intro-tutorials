@@ -1,13 +1,14 @@
 #pragma once
-#include "GameObject.h"
+#include "propObject.h"
 
-class CBrick : public CGameObject
+class CBrick : public CpropObject
 {
 public:
-	CBrick(float x, float y, float width, float height, LPTEXTURE texture)
-		: CGameObject(x, y, width, height, texture){}
-	void Update(DWORD dt) override {};
+    CBrick(float x, float y, float width, float height, LPTEXTURE texture)
+        : CpropObject(x, y, width, height, texture) {
+    }
+    void Update(DWORD dt) override;
 
-	// Override collision handler
-	void OnCollision(LPGAMEOBJECT other) override;
+    // Override collision handler
+    void OnCollision(LPGAMEOBJECT other) override;
 };

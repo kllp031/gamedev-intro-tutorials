@@ -18,12 +18,14 @@
 
 class CMario : public CTank
 {
+private:
 public:
     CMario(float x, float y, float width, float height, float vx, float vy, LPTEXTURE texture)
         : CTank(x, y, width, height, vx, vy, texture)
     {
         isAlive = true;
         state = SHIP_STATE_UP;
+
 
         CGame* game = CGame::GetInstance();
         texTankUp = game->LoadTexture(TEXTURE_SHIP_UP);

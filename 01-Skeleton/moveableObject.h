@@ -1,5 +1,6 @@
 #pragma once  
 #include "GameObject.h"  
+#include "Game.h"
 
 class CMoveableObject : public CGameObject
 {
@@ -11,12 +12,7 @@ public:
         : CGameObject(x, y, width, height, texture), vx(vx), vy(vy)
     {
     }
-    //virtual void Update(DWORD dt) override;  
-    //virtual void Render() override;  
 
-    //// Check if this object collides with another object  
-    //virtual bool CheckCollision(LPGAMEOBJECT other) {}  
-
-    //// Handle collision with another object  
-    //virtual void OnCollision(LPGAMEOBJECT other) {}  
+    // Handle collision with another object  
+    virtual void OnCollision(LPGAMEOBJECT other);
 };

@@ -14,8 +14,10 @@ void CTank::OnCollision(LPGAMEOBJECT other)
 		if (currentHealth <= 0)
 		{
 			Die();
+            return;
 		}
 	}
+	CMoveableObject::OnCollision(other);
 }
 
 BulletManager bulletManager;

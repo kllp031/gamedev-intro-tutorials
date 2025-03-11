@@ -142,12 +142,12 @@ void LoadResources()
 
 	objects.push_back(ship);
 
-	for (size_t i = 0; i < 8; i++)
+	for (size_t i = 0; i < 2; i++)
 	{
 		objects.push_back(new CEnemy(ENEMY_START_X + i * 32.0f, ENEMY_START_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_START_VX, ENEMY_START_VY, texEnemy));
 	}
 
-	for(int i = 0; i < 0; i++)		 
+	for(int i = 0; i < 2; i++)		 
 		objects.push_back(new CBrick(BRICK_X+i*BRICK_WIDTH, BRICK_Y, BRICK_WIDTH, BRICK_HEIGHT, texBrick));
 	
 

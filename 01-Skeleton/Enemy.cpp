@@ -173,13 +173,16 @@ Rect CEnemy::GetBounds()
 
 void CEnemy::OnCollision(LPGAMEOBJECT other)
 {
-	CTank::OnCollision(other);
-    if (currentHealth == 2) 
+    // Call the parent class's OnCollision
+    CTank::OnCollision(other);
+
+    // Update textures based on health
+    if (currentHealth == 2)
     {
-		texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_DOWN);
-		texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_LEFT);
-		texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_RIGHT);
-		texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_UP);
+        texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_DOWN);
+        texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_LEFT);
+        texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_RIGHT);
+        texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_UP);
     }
     else if (currentHealth == 1)
     {
@@ -187,5 +190,21 @@ void CEnemy::OnCollision(LPGAMEOBJECT other)
         texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_LEFT);
         texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_RIGHT);
         texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_UP);
+    }
+
+    // Add a small push to help unstick the enemy
+    switch (state) {
+    case SHIP_STATE_UP:
+        y -= 1.0f;
+        break;
+    case SHIP_STATE_DOWN:
+        y += 1.0f;
+        break;
+    case SHIP_STATE_LEFT:
+        x -= 1.0f;
+        break;
+    case SHIP_STATE_RIGHT:
+        x += 1.0f;
+        break;
     }
 }

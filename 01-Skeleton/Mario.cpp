@@ -27,7 +27,6 @@ void CMario::Update(DWORD dt, bool keyStates[], bool keyPressed[])
 
     if (!isAlive) return;
 
-    // Handle movement input
     if (keyStates['A']) {
         vx = -MARIO_VX;  // Move left
         state = SHIP_STATE_LEFT;
@@ -38,33 +37,33 @@ void CMario::Update(DWORD dt, bool keyStates[], bool keyPressed[])
         state = SHIP_STATE_RIGHT;
         texture = texTankRight;
     }
-	else if (keyStates['W']) {
-		vy = -MARIO_VX;  // Move up
-		state = SHIP_STATE_UP;
+    else if (keyStates['W']) {
+        vy = -MARIO_VX;  // Move up
+        state = SHIP_STATE_UP;
         texture = texTankUp;
-	}
-	else if (keyStates['S']) {
-		vy = MARIO_VX;  // Move down
-		state = SHIP_STATE_DOWN;
-		texture = texTankDown;
-	}
-	else {
-		vx = 0; // Stop if no key is pressed
-		vy = 0; // Stop if no key is pressed
-	}
+    }
+    else if (keyStates['S']) {
+        vy = MARIO_VX;  // Move down
+        state = SHIP_STATE_DOWN;
+        texture = texTankDown;
+    }
+    else {
+        vx = 0; // Stop if no key is pressed
+        vy = 0; // Stop if no key is pressed
+    }
 
     x += vx * dt; // Update x
-	y += vy * dt; // Update y
+    y += vy * dt; // Update y
 
     // Get screen width
     int BackBufferWidth = CGame::GetInstance()->GetBackBufferWidth();
-	int BackBufferHeight = CGame::GetInstance()->GetBackBufferHeight();
+    int BackBufferHeight = CGame::GetInstance()->GetBackBufferHeight();
 
     // Fix lagging issue at boundaries
     float leftLimit = MARIO_WIDTH / 2.0f;
     float rightLimit = BackBufferWidth - MARIO_WIDTH / 2.0f;
-	float upperLimit = MARIO_HEIGHT / 2.0f;
-	float lowerLimit = BackBufferHeight - MARIO_HEIGHT / 2.0f;
+    float upperLimit = MARIO_HEIGHT / 2.0f;
+    float lowerLimit = BackBufferHeight - MARIO_HEIGHT / 2.0f;
 
     if (x <= leftLimit) {
         x = leftLimit + 1.0f; // Ensure it's inside bounds
@@ -86,6 +85,7 @@ void CMario::Update(DWORD dt, bool keyStates[], bool keyPressed[])
     // Check if spacebar is pressed and shoot a bullet
     if (keyPressed[' ']) Shoot();
     keyPressed[' '] = false;
+
 }
 
 void CMario::Render()
@@ -120,5 +120,5 @@ void CMario::OnCollision(LPGAMEOBJECT other)
     // Check what type of object we collided with
     // For example, if it's an enemy:
     DebugOut(L"[INFO] Something hit Mario.\n");
-	CTank::OnCollision(other);
+    CTank::OnCollision(other);
 }

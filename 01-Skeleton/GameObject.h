@@ -51,7 +51,7 @@ public:
     virtual bool CheckCollision(LPGAMEOBJECT other);
 
     // Handle collision with another object
-    virtual void OnCollision(LPGAMEOBJECT other) {}
+    virtual void OnCollision(LPGAMEOBJECT other) {};
     
 
     virtual void Update(DWORD dt) = 0;

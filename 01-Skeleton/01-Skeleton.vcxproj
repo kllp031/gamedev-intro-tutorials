@@ -133,6 +133,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="moveableObject.cpp" />
+    <ClCompile Include="propObject.cpp" />
+    <ClCompile Include="propObject.h" />
     <ClCompile Include="Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
