@@ -23,8 +23,11 @@ protected:
     float width;    // Add width property
     float height;   // Add height property
     LPTEXTURE texture;
+    bool isDeleted = false;
 
 public:
+    void MarkForDeletion() { isDeleted = true; }
+    bool IsDeleted() { return isDeleted; }
 
     CGameObject(float x = 0.0f, float y = 0.0f, int width = 0, int height = 0, LPTEXTURE texture = NULL);
 
@@ -56,5 +59,5 @@ public:
 
     virtual void Update(DWORD dt) = 0;
     virtual void Render();
-    ~CGameObject();
+    virtual ~CGameObject();
 };

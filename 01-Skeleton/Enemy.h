@@ -59,28 +59,29 @@ public:
         health = (rand() % 3) + 1;
 		currentHealth = health;
 
-        switch (health)
-        {
-        case 1:
-            texTankUp = game->LoadTexture(TEXTURE_SHIP_W_UP);
-            texTankDown = game->LoadTexture(TEXTURE_SHIP_W_DOWN);
-            texTankLeft = game->LoadTexture(TEXTURE_SHIP_W_LEFT);
-            texTankRight = game->LoadTexture(TEXTURE_SHIP_W_RIGHT);
-            break;
-        case 2:
-            texTankUp = game->LoadTexture(TEXTURE_SHIP_R_UP);
-            texTankDown = game->LoadTexture(TEXTURE_SHIP_R_DOWN);
-            texTankLeft = game->LoadTexture(TEXTURE_SHIP_R_LEFT);
-            texTankRight = game->LoadTexture(TEXTURE_SHIP_R_RIGHT);
-            break;
-        case 3:
-        default:
-            texTankUp = game->LoadTexture(TEXTURE_SHIP_G_UP);
-            texTankDown = game->LoadTexture(TEXTURE_SHIP_G_DOWN);
-            texTankLeft = game->LoadTexture(TEXTURE_SHIP_G_LEFT);
-            texTankRight = game->LoadTexture(TEXTURE_SHIP_G_RIGHT);
-            break;
-        }
+		SetTexture(health);
+        //switch (health)
+        //{
+        //case 1:
+        //    texTankUp = game->LoadTexture(TEXTURE_SHIP_W_UP);
+        //    texTankDown = game->LoadTexture(TEXTURE_SHIP_W_DOWN);
+        //    texTankLeft = game->LoadTexture(TEXTURE_SHIP_W_LEFT);
+        //    texTankRight = game->LoadTexture(TEXTURE_SHIP_W_RIGHT);
+        //    break;
+        //case 2:
+        //    texTankUp = game->LoadTexture(TEXTURE_SHIP_R_UP);
+        //    texTankDown = game->LoadTexture(TEXTURE_SHIP_R_DOWN);
+        //    texTankLeft = game->LoadTexture(TEXTURE_SHIP_R_LEFT);
+        //    texTankRight = game->LoadTexture(TEXTURE_SHIP_R_RIGHT);
+        //    break;
+        //case 3:
+        //default:
+        //    texTankUp = game->LoadTexture(TEXTURE_SHIP_G_UP);
+        //    texTankDown = game->LoadTexture(TEXTURE_SHIP_G_DOWN);
+        //    texTankLeft = game->LoadTexture(TEXTURE_SHIP_G_LEFT);
+        //    texTankRight = game->LoadTexture(TEXTURE_SHIP_G_RIGHT);
+        //    break;
+        //}
     }
 
     bool CheckCollision(LPGAMEOBJECT other) override;
@@ -93,6 +94,8 @@ public:
     void Update(DWORD dt) override;
     void Render();
     void ChangeDirection();
+
+	void SetTexture(int health);
 
     void OnCollision(LPGAMEOBJECT other) override;
 };

@@ -126,6 +126,8 @@ void CEnemy::ChangeDirection() {
     directionChangeTimer = 0;
 }
 
+
+
 void CEnemy::Respawn()
 {
     // Generate random X position within screen bounds
@@ -139,6 +141,7 @@ void CEnemy::Respawn()
     // Reset enemy state
     isAlive = true;
 	currentHealth = health;
+	SetTexture(currentHealth);
     respawnTimer = 0;
 
     DebugOut(L"[INFO] Enemy respawned at X: %f, Y: %f\n", x, y);
@@ -177,20 +180,7 @@ void CEnemy::OnCollision(LPGAMEOBJECT other)
     CTank::OnCollision(other);
 
     // Update textures based on health
-    if (currentHealth == 2)
-    {
-        texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_DOWN);
-        texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_LEFT);
-        texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_RIGHT);
-        texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_UP);
-    }
-    else if (currentHealth == 1)
-    {
-        texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_DOWN);
-        texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_LEFT);
-        texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_RIGHT);
-        texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_UP);
-    }
+	SetTexture(currentHealth);
 
     // Add a small push to help unstick the enemy
     switch (state) {
@@ -206,5 +196,28 @@ void CEnemy::OnCollision(LPGAMEOBJECT other)
     case SHIP_STATE_RIGHT:
         x += 1.0f;
         break;
+    }
+}
+
+// setting texture accoring to health
+void CEnemy::SetTexture(int health)
+{
+    if (health == 1) {
+        texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_UP);
+        texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_DOWN);
+        texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_LEFT);
+        texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_W_RIGHT);
+    }
+    else if (health == 2) {
+        texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_UP);
+        texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_DOWN);
+        texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_LEFT);
+        texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_R_RIGHT);
+    }
+    else {
+        texTankUp = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_G_UP);
+        texTankDown = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_G_DOWN);
+        texTankLeft = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_G_LEFT);
+        texTankRight = CGame::GetInstance()->LoadTexture(TEXTURE_SHIP_G_RIGHT);
     }
 }

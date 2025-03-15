@@ -183,6 +183,9 @@ void Update(DWORD dt) {
 		CBullet* bullet = bulletManager.bullets[i];
 
 		for (auto obj : objects) {
+			// Skip collision checks with deleted objects
+			if (obj->IsDeleted()) continue;
+
 			if (bullet->CheckCollision(obj)) {
 				// Mark bullet for removal
 				bullet->exist = false;
@@ -199,6 +202,24 @@ void Update(DWORD dt) {
 
 				// Break out of the inner loop once collision is detected
 				break;
+			}
+		}
+	}
+
+	// Similarly for object-to-object collision checks
+	// Check collisions between other game objects
+	for (int i = 0; i < objects.size(); i++) {
+		// Skip deleted objects
+		if (objects[i]->IsDeleted()) continue;
+
+		for (int j = i + 1; j < objects.size(); j++) {
+			// Skip deleted objects
+			if (objects[j]->IsDeleted()) continue;
+
+			if (objects[i]->CheckCollision(objects[j])) {
+				// Handle collision
+				objects[i]->OnCollision(objects[j]);
+				objects[j]->OnCollision(objects[i]);
 			}
 		}
 	}
@@ -226,27 +247,6 @@ void Update(DWORD dt) {
 			delete bullet;
 		}
 	}
-
-	// Check collisions between other game objects
-	for (int i = 0; i < objects.size(); i++) {
-		for (int j = i + 1; j < objects.size(); j++) {
-			if (objects[i]->CheckCollision(objects[j])) {
-				// Handle collision
-				objects[i]->OnCollision(objects[j]);
-				objects[j]->OnCollision(objects[i]);
-			}
-		}
-	}
-
-	// AFTER all collision checking is done, remove dead objects
-	for (auto obj : objectsToDelete) {
-		auto it = std::find(objects.begin(), objects.end(), obj);
-		if (it != objects.end()) {
-			objects.erase(it);
-		}
-		delete obj;
-	}
-	objectsToDelete.clear();
 }
 
 void Render() {
@@ -267,8 +267,11 @@ void Render() {
 		FLOAT NewBlendFactor[4] = { 0,0,0,0 };
 		pD3DDevice->OMSetBlendState(g->GetAlphaBlending(), NewBlendFactor, 0xffffffff);
 
-		for (int i = 0; i < objects.size(); i++)
-			objects[i]->Render();
+		for (int i = 0; i < objects.size(); i++) {
+			if (!objects[i]->IsDeleted()) {  // Only render objects that aren't deleted
+				objects[i]->Render();
+			}
+		}
 
 		// Render bullets
 		bulletManager.Render();
@@ -278,8 +281,17 @@ void Render() {
 	}
 }
 
-
-
+// Create a new function to be called after Render()
+void CleanupDeletedObjects() {
+	for (auto obj : objectsToDelete) {
+		auto it = std::find(objects.begin(), objects.end(), obj);
+		if (it != objects.end()) {
+			objects.erase(it);
+		}
+		delete obj;
+	}
+	objectsToDelete.clear();
+}
 
 HWND CreateGameWindow(HINSTANCE hInstance, int nCmdShow, int ScreenWidth, int ScreenHeight)
 {
@@ -358,6 +370,7 @@ int Run()
 			frameStart = now;
 			Update((DWORD)dt);
 			Render();
+			CleanupDeletedObjects();
 		}
 		else
 			Sleep((DWORD)(tickPerFrame - dt));

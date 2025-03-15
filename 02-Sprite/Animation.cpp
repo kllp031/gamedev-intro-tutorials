@@ -20,17 +20,30 @@ void CAnimation::Render(float x, float y)
 	}
 	else
 	{
-		DWORD t = frames[currentFrame]->GetTime();
-		if (now - lastFrameTime > t)
+		// Don't update frame if animation is finished (non-looping and at last frame)
+		if (!isLooping && currentFrame == frames.size() - 1)
 		{
-			currentFrame++;
-			lastFrameTime = now;
-			if (currentFrame == frames.size()) currentFrame = 0;
-			//DebugOut(L"now: %d, lastFrameTime: %d, t: %d\n", now, lastFrameTime, t);
+			// Just continue showing the last frame
 		}
+		else
+		{
+			DWORD t = frames[currentFrame]->GetTime();
+			if (now - lastFrameTime > t)
+			{
+				currentFrame++;
+				lastFrameTime = now;
 
+				// Handle end of animation differently based on looping flag
+				if (currentFrame == frames.size())
+				{
+					if (isLooping)
+						currentFrame = 0;  // Loop back to start
+					else
+						currentFrame = frames.size() - 1;  // Stay on last frame
+				}
+			}
+		}
 	}
 
 	frames[currentFrame]->GetSprite()->Draw(x, y);
 }
-

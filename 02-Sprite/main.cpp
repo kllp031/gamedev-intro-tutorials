@@ -26,7 +26,9 @@
 
 
 #include "Mario.h"
-
+#include "Brick.h"
+#include "Koopa.h"
+#include "Door.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"02 - Sprite animation"
@@ -38,23 +40,64 @@
 
 #define ID_TEX_MARIO 0
 #define ID_TEX_ENEMY 10
+#define ID_TEX_ENEMY_FLIPPED 11
 #define ID_TEX_MISC 20
 
 #define TEXTURES_DIR L"textures"
 #define TEXTURE_PATH_MARIO TEXTURES_DIR "\\mario_transparent.png"
 #define TEXTURE_PATH_MISC TEXTURES_DIR "\\misc_transparent.png"
-#define TEXTURE_PATH_ENEMIES TEXTURES_DIR "\\enemies.png"
+#define TEXTURE_PATH_ENEMIES TEXTURES_DIR "\\enemies_transparent.png"
+#define TEXTURE_PATH_ENEMIES_FLIPPED TEXTURES_DIR "\\enemies_flipped.png"
 
 CMario *mario;
 #define MARIO_START_X 10.0f
 #define MARIO_START_Y 130.0f
 #define MARIO_START_VX 0.1f
+#define MARIO_START_VY 0.0f
+#define MARIO_WIDTH 14
+#define MARIO_HEIGHT 27
 
 CBrick *brick;
+
+CDoor* door;
+#define DOOR_START_X 200.0f
+#define DOOR_START_Y 130.0f
+#define DOOR_WIDTH 16
+#define DOOR_HEIGHT 26
+
+CKoopa *koopa;
+#define KOOPA_START_X 50.0f
+#define KOOPA_START_Y 130.0f
+#define KOOPA_START_VX 0.1f
+#define KOOPA_START_VY 0.0f
+#define KOOPA_WIDTH 18
+#define KOOPA_HEIGHT 27
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case VK_LEFT:
+			mario->SetDirection(-1);
+			mario->SetMoving(true);
+			break;
+		case VK_RIGHT:
+			mario->SetDirection(1);
+			mario->SetMoving(true);
+			break;
+		}
+		break;
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_LEFT:
+		case VK_RIGHT:
+			mario->SetMoving(false);
+			break;
+		}
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -71,66 +114,143 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 */
 void LoadResources()
 {
-	CTextures * textures = CTextures::GetInstance();
+	CTextures* textures = CTextures::GetInstance();
 
 	textures->Add(ID_TEX_MARIO, TEXTURE_PATH_MARIO);
-	//textures->Add(ID_ENEMY_TEXTURE, TEXTURE_PATH_ENEMIES, D3DCOLOR_XRGB(156, 219, 239));
+	textures->Add(ID_TEX_ENEMY, TEXTURE_PATH_ENEMIES);
+	textures->Add(ID_TEX_ENEMY_FLIPPED, TEXTURE_PATH_ENEMIES_FLIPPED);
 	textures->Add(ID_TEX_MISC, TEXTURE_PATH_MISC);
 
+	// Verify textures are loaded
+	if (textures->Get(ID_TEX_MARIO) == nullptr) {
+		DebugOut(L"[ERROR] Failed to load texture: %s\n", TEXTURE_PATH_MARIO);
+	}
+	if (textures->Get(ID_TEX_ENEMY) == nullptr) {
+		DebugOut(L"[ERROR] Failed to load texture: %s\n", TEXTURE_PATH_ENEMIES);
+	}
+	if (textures->Get(ID_TEX_MISC) == nullptr) {
+		DebugOut(L"[ERROR] Failed to load texture: %s\n", TEXTURE_PATH_MISC);
+	}
 
-	CSprites * sprites = CSprites::GetInstance();
-	
+	CSprites* sprites = CSprites::GetInstance();
 	LPTEXTURE texMario = textures->Get(ID_TEX_MARIO);
 
 	// readline => id, left, top, right, bottom
 
-	//MARIO SPRITE
-	//move right sprites
+	// MARIO SPRITE
+	// idle right sprites
+	sprites->Add(10001, 246, 154, 260, 181, texMario);
+
+	// idle left sprites
+	sprites->Add(10011, 186, 154, 200, 181, texMario);
+
+	// move right sprites
 	sprites->Add(10001, 246, 154, 259, 181, texMario);
 	sprites->Add(10002, 275, 154, 290, 181, texMario);
 	sprites->Add(10003, 304, 154, 321, 181, texMario);
 
-	//move left sprites
+	// move left sprites
 	sprites->Add(10011, 186, 154, 200, 181, texMario);
 	sprites->Add(10012, 155, 154, 171, 181, texMario);
 	sprites->Add(10013, 125, 154, 141, 181, texMario);
 
-	CAnimations * animations = CAnimations::GetInstance();
+	CAnimations* animations = CAnimations::GetInstance();
 	LPANIMATION ani;
 
-	//move right animation
+	ani = new CAnimation(100);
+	ani->Add(10001);
+	animations->Add(502, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(10011);
+	animations->Add(503, ani);
+
+	// move right animation
 	ani = new CAnimation(100);
 	ani->Add(10001);
 	ani->Add(10002);
 	ani->Add(10003);
 	animations->Add(500, ani);
 
-	//move left aniamtion
+	// move left animation
 	ani = new CAnimation(100);
 	ani->Add(10011);
 	ani->Add(10012);
 	ani->Add(10013);
 	animations->Add(501, ani);
 
-	//BRICK SPRITE
+	// BRICK SPRITE
 	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);
-	sprites->Add(20001, 300, 117, 317, 133, texMisc);
-	sprites->Add(20002, 318, 117, 335, 133, texMisc);
-	sprites->Add(20003, 336, 117, 353, 133, texMisc);
-	sprites->Add(20004, 354, 117, 371, 133, texMisc);
+	sprites->Add(20001, 300, 135, 317, 151, texMisc);
+	sprites->Add(20002, 318, 135, 335, 151, texMisc);
+	sprites->Add(20003, 336, 135, 353, 151, texMisc);
+	sprites->Add(20004, 354, 135, 371, 151, texMisc);
 
 	ani = new CAnimation(100);
-	ani->Add(20001,1000);
+	ani->Add(20001, 1000);
 	ani->Add(20002);
 	ani->Add(20003);
 	ani->Add(20004);
 	animations->Add(510, ani);
-	
-	
-	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_START_VX);
-	brick = new CBrick(100.0f, 100.0f);
-}
 
+	//door top sprite
+	sprites->Add(40001, 282, 99, 298, 115, texMisc);
+	sprites->Add(40003, 282, 135, 298, 151, texMisc);
+	sprites->Add(40005, 282, 171, 298, 187, texMisc);
+	sprites->Add(40007, 282, 207, 298, 223, texMisc);
+
+	//door bottom sprite
+	sprites->Add(40002, 282, 117, 298, 133, texMisc);
+	sprites->Add(40004, 282, 153, 298, 169, texMisc);
+	sprites->Add(40006, 282, 189, 298, 205, texMisc);
+	sprites->Add(40008, 282, 225, 298, 241, texMisc);
+
+	//door top animation
+	ani = new CAnimation(100);
+	ani->Add(40001);
+	ani->Add(40003);
+	ani->Add(40005);
+	ani->Add(40007);
+	ani -> SetLooping(false);
+	animations->Add(530, ani);
+
+	//door bottom animation
+	ani = new CAnimation(100);
+	ani->Add(40002);
+	ani->Add(40004);
+	ani->Add(40006);
+	ani->Add(40008);
+	ani->SetLooping(false);
+	animations->Add(531, ani);
+
+
+	// Koopa walking sprites
+	LPTEXTURE texEnemies = textures->Get(ID_TEX_ENEMY);
+	sprites->Add(30001, 5, 129, 23, 157, texEnemies);
+	sprites->Add(30002, 27, 129, 45, 157, texEnemies);
+
+	LPTEXTURE texEnemies_flipped = textures->Get(ID_TEX_ENEMY_FLIPPED);
+	sprites->Add(30011, 435, 129, 453, 157, texEnemies_flipped);
+	sprites->Add(30012, 457, 129, 475, 157, texEnemies_flipped);
+
+	// Koopa walking animation
+	ani = new CAnimation(200);
+	ani->Add(30001);
+	ani->Add(30002);
+	animations->Add(520, ani);
+
+	// Koopa walking flipped animation
+	ani = new CAnimation(200);
+	ani->Add(30011);
+	ani->Add(30012);
+	animations->Add(521, ani);
+
+	mario = new CMario(MARIO_START_X, MARIO_START_Y, MARIO_WIDTH, MARIO_HEIGHT, MARIO_START_VX, MARIO_START_VY);
+	brick = new CBrick(100.0f, 100.0f);
+	koopa = new CKoopa(KOOPA_START_X, KOOPA_START_Y, KOOPA_WIDTH, KOOPA_HEIGHT ,KOOPA_START_VX, KOOPA_START_VY);
+	door = new CDoor(DOOR_START_X, DOOR_START_Y, DOOR_WIDTH, DOOR_HEIGHT);
+}
+	
 /*
 	Update world status for this frame
 	dt: time period between beginning of last frame and beginning of this frame
@@ -138,6 +258,12 @@ void LoadResources()
 void Update(DWORD dt)
 {
 	mario->Update(dt);
+	koopa->Update(dt);
+	door->Update(dt);
+	if(door->CheckCollision(mario))
+	{
+		door->OnCollision(mario);
+	}
 }
 
 void Render()
@@ -162,6 +288,10 @@ void Render()
 
 		brick->Render();
 		mario->Render();
+		// In Render() function, add after mario->Render():
+		koopa->Render();
+		door->Render();
+
 
 		// Uncomment this line to see how to draw a porttion of a texture  
 		//g->Draw(10, 10, texMisc, 300, 117, 316, 133);

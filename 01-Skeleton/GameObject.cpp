@@ -15,7 +15,7 @@ CGameObject::CGameObject(float x, float y, int width, int height, LPTEXTURE tex)
 
 void CGameObject::Render()
 {
-    if (texture == NULL) return; // Prevent null pointer access
+    if (isDeleted || texture == NULL) return; // Don't render deleted objects
     CGame::GetInstance()->Draw(x, y, texture);
 }
 
@@ -34,5 +34,5 @@ bool CGameObject::CheckCollision(LPGAMEOBJECT other)
 
 CGameObject::~CGameObject()
 {
-    if (texture != NULL) delete texture;
+    //if (texture != NULL) delete texture;
 }

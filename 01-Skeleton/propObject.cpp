@@ -2,7 +2,8 @@
 
 void CpropObject::Update(DWORD dt)
 {
-	//doesnt update
+	x = x;
+	y = y;
 }
 
 void CpropObject::Render()
