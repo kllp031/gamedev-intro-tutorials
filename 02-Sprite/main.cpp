@@ -73,6 +73,8 @@ CKoopa *koopa;
 #define KOOPA_WIDTH 18
 #define KOOPA_HEIGHT 27
 
+// In main.cpp, update the WinProc function:
+
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
@@ -87,6 +89,9 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			mario->SetDirection(1);
 			mario->SetMoving(true);
 			break;
+		case VK_SPACE:
+			mario->SetJumping(true); // Use SetJumping instead of Jump
+			break;
 		}
 		break;
 	case WM_KEYUP:
@@ -95,6 +100,9 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case VK_LEFT:
 		case VK_RIGHT:
 			mario->SetMoving(false);
+			break;
+		case VK_SPACE:
+			mario->SetJumping(false); // Handle jump button release
 			break;
 		}
 		break;
@@ -107,6 +115,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
+
 
 /*
 	Load all game resources 
@@ -144,6 +153,12 @@ void LoadResources()
 	// idle left sprites
 	sprites->Add(10011, 186, 154, 200, 181, texMario);
 
+	//jumo right sprites
+	sprites->Add(10021, 395, 275, 411, 301, texMario);
+
+	//jump left sprites
+	sprites->Add(10022, 35, 275, 51, 301, texMario);
+
 	// move right sprites
 	sprites->Add(10001, 246, 154, 259, 181, texMario);
 	sprites->Add(10002, 275, 154, 290, 181, texMario);
@@ -156,14 +171,6 @@ void LoadResources()
 
 	CAnimations* animations = CAnimations::GetInstance();
 	LPANIMATION ani;
-
-	ani = new CAnimation(100);
-	ani->Add(10001);
-	animations->Add(502, ani);
-
-	ani = new CAnimation(100);
-	ani->Add(10011);
-	animations->Add(503, ani);
 
 	// move right animation
 	ani = new CAnimation(100);
@@ -178,6 +185,28 @@ void LoadResources()
 	ani->Add(10012);
 	ani->Add(10013);
 	animations->Add(501, ani);
+
+	//idle right animation
+	ani = new CAnimation(100);
+	ani->Add(10001);
+	animations->Add(502, ani);
+
+	//idle left animation
+	ani = new CAnimation(100);
+	ani->Add(10011);
+	animations->Add(503, ani);
+
+	//jump right animation
+	ani = new CAnimation(100);
+	ani->Add(10021);
+	ani->SetLooping(false);
+	animations->Add(504, ani);
+
+	//jump left animation
+	ani = new CAnimation(100);
+	ani->Add(10022);
+	ani->SetLooping(false);
+	animations->Add(505, ani);
 
 	// BRICK SPRITE
 	LPTEXTURE texMisc = textures->Get(ID_TEX_MISC);

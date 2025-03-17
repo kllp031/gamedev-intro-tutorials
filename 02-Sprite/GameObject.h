@@ -7,7 +7,6 @@
 #include "Sprites.h"
 #include "debug.h"
 
-
 using namespace std;
 
 // Define a simple rectangle structure for collision bounds
