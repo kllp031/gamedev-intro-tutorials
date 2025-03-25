@@ -1,7 +1,15 @@
 # id	left	top	right	bottom	texture_id
 [SPRITES]
-20001	372	153	387	168	20
+#Bottom middle floor
+20001	104	55	120	71	30
+
+#Normal Brick
+20002	122	289	138	305	30
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
+#Bottom middle floor
 10000	20001	1000
+
+#Normal Brick
+10001	20002	1000

@@ -97,7 +97,16 @@ void CMario::OnCollisionWithCoin(LPCOLLISIONEVENT e)
 int CMario::GetAniIdSmall()
 {
 	int aniId = -1;
-	if (!isOnPlatform || isJumping)
+
+	// Small Mario doesn't have sitting animations, but for consistency
+	if (isSitting)
+	{
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
+		else
+			aniId = ID_ANI_MARIO_SMALL_IDLE_LEFT;
+	}
+	else if (!isOnPlatform)
 	{
 		if (abs(ax) == MARIO_ACCEL_RUN_X)
 		{
@@ -114,52 +123,48 @@ int CMario::GetAniIdSmall()
 				aniId = ID_ANI_MARIO_SMALL_JUMP_WALK_LEFT;
 		}
 	}
-	else
-		if (isSitting)
-		{
-			if (nx > 0)
-				aniId = ID_ANI_MARIO_SIT_RIGHT;
-			else
-				aniId = ID_ANI_MARIO_SIT_LEFT;
-		}
-		else
-			if (vx == 0)
-			{
-				if (nx > 0) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
-				else aniId = ID_ANI_MARIO_SMALL_IDLE_LEFT;
-			}
-			else if (vx > 0)
-			{
-				if (ax < 0)
-					aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_WALK_X)
-					aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
-			}
-			else // vx < 0
-			{
-				if (ax > 0)
-					aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_WALK_X)
-					aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
-			}
+	else if (vx == 0)
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
+		else aniId = ID_ANI_MARIO_SMALL_IDLE_LEFT;
+	}
+	else if (vx > 0)
+	{
+		if (ax < 0)
+			aniId = ID_ANI_MARIO_SMALL_BRACE_RIGHT;
+		else if (ax == MARIO_ACCEL_RUN_X)
+			aniId = ID_ANI_MARIO_SMALL_RUNNING_RIGHT;
+		else if (ax == MARIO_ACCEL_WALK_X)
+			aniId = ID_ANI_MARIO_SMALL_WALKING_RIGHT;
+	}
+	else // vx < 0
+	{
+		if (ax > 0)
+			aniId = ID_ANI_MARIO_SMALL_BRACE_LEFT;
+		else if (ax == -MARIO_ACCEL_RUN_X)
+			aniId = ID_ANI_MARIO_SMALL_RUNNING_LEFT;
+		else if (ax == -MARIO_ACCEL_WALK_X)
+			aniId = ID_ANI_MARIO_SMALL_WALKING_LEFT;
+	}
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_SMALL_IDLE_RIGHT;
 
 	return aniId;
 }
 
-
-//
-// Get animdation ID for big Mario
-//
 int CMario::GetAniIdBig()
 {
 	int aniId = -1;
-	if (!isOnPlatform || isJumping)
+
+	// Always prioritize sitting animation if isSitting is true
+	if (isSitting)
+	{
+		if (nx > 0)
+			aniId = ID_ANI_MARIO_SIT_RIGHT;
+		else
+			aniId = ID_ANI_MARIO_SIT_LEFT;
+	}
+	else if (!isOnPlatform)
 	{
 		if (abs(ax) == MARIO_ACCEL_RUN_X)
 		{
@@ -176,38 +181,30 @@ int CMario::GetAniIdBig()
 				aniId = ID_ANI_MARIO_JUMP_WALK_LEFT;
 		}
 	}
-	else
-		if (isSitting)
-		{
-			if (nx > 0)
-				aniId = ID_ANI_MARIO_SIT_RIGHT;
-			else
-				aniId = ID_ANI_MARIO_SIT_LEFT;
-		}
-		else
-			if (vx == 0)
-			{
-				if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
-				else aniId = ID_ANI_MARIO_IDLE_LEFT;
-			}
-			else if (vx > 0)
-			{
-				if (ax < 0)
-					aniId = ID_ANI_MARIO_BRACE_RIGHT;
-				else if (ax == MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_RIGHT;
-				else if (ax == MARIO_ACCEL_WALK_X)
-					aniId = ID_ANI_MARIO_WALKING_RIGHT;
-			}
-			else // vx < 0
-			{
-				if (ax > 0)
-					aniId = ID_ANI_MARIO_BRACE_LEFT;
-				else if (ax == -MARIO_ACCEL_RUN_X)
-					aniId = ID_ANI_MARIO_RUNNING_LEFT;
-				else if (ax == -MARIO_ACCEL_WALK_X)
-					aniId = ID_ANI_MARIO_WALKING_LEFT;
-			}
+	else if (vx < 0)
+	{
+		if (ax > 0)
+			aniId = ID_ANI_MARIO_BRACE_LEFT;
+		else if (ax == -MARIO_ACCEL_RUN_X)
+			aniId = ID_ANI_MARIO_RUNNING_LEFT;
+		else if (ax == -MARIO_ACCEL_WALK_X)
+			aniId = ID_ANI_MARIO_WALKING_LEFT;
+
+	}
+	else if (vx > 0)
+	{
+		if (ax < 0)
+			aniId = ID_ANI_MARIO_BRACE_RIGHT;
+		else if (ax == MARIO_ACCEL_RUN_X)
+			aniId = ID_ANI_MARIO_RUNNING_RIGHT;
+		else if (ax == MARIO_ACCEL_WALK_X)
+			aniId = ID_ANI_MARIO_WALKING_RIGHT;
+	}
+	else // vx < 0
+	{
+		if (nx > 0) aniId = ID_ANI_MARIO_IDLE_RIGHT;
+		else aniId = ID_ANI_MARIO_IDLE_LEFT;
+	}
 
 	if (aniId == -1) aniId = ID_ANI_MARIO_IDLE_RIGHT;
 
@@ -236,41 +233,56 @@ void CMario::Render()
 void CMario::SetState(int state)
 {
 	// DIE is the end state, cannot be changed! 
-	if (this->state == MARIO_STATE_DIE) return; 
+	if (this->state == MARIO_STATE_DIE) return;
 
 	switch (state)
 	{
-	case MARIO_STATE_RUNNING_RIGHT:
-		if (isSitting) break;
-		isRunning = true;
-		maxVx = MARIO_RUNNING_SPEED;
-		ax = MARIO_ACCEL_RUN_X;
-		nx = 1;
-		break;
 	case MARIO_STATE_RUNNING_LEFT:
-		if (isSitting) break;
+		// Only stop sitting if on platform
+		if (isSitting && isOnPlatform) {
+			isSitting = false;
+			y -= MARIO_SIT_HEIGHT_ADJUST;
+		}
 		isRunning = true;
 		maxVx = -MARIO_RUNNING_SPEED;
 		ax = -MARIO_ACCEL_RUN_X;
 		nx = -1;
 		break;
-	case MARIO_STATE_WALKING_RIGHT:
-		if (isSitting) break;
+	case MARIO_STATE_RUNNING_RIGHT:
+		// Only stop sitting if on platform
+		if (isSitting && isOnPlatform) {
+			isSitting = false;
+			y -= MARIO_SIT_HEIGHT_ADJUST;
+		}
 		isRunning = true;
-		maxVx = MARIO_WALKING_SPEED;
-		ax = MARIO_ACCEL_WALK_X;
+		maxVx = MARIO_RUNNING_SPEED;
+		ax = MARIO_ACCEL_RUN_X;
 		nx = 1;
 		break;
 	case MARIO_STATE_WALKING_LEFT:
-		if (isSitting) break;
+		// Only stop sitting if on platform
+		if (isSitting && isOnPlatform) {
+			isSitting = false;
+			y -= MARIO_SIT_HEIGHT_ADJUST;
+		}
 		isRunning = true;
 		maxVx = -MARIO_WALKING_SPEED;
 		ax = -MARIO_ACCEL_WALK_X;
 		nx = -1;
 		break;
+	case MARIO_STATE_WALKING_RIGHT:
+		// Only stop sitting if on platform
+		if (isSitting && isOnPlatform) {
+			isSitting = false;
+			y -= MARIO_SIT_HEIGHT_ADJUST;
+		}
+		isRunning = true;
+		maxVx = MARIO_WALKING_SPEED;
+		ax = MARIO_ACCEL_WALK_X;
+		nx = 1;
+		break;
 	case MARIO_STATE_JUMP:
-		if (isSitting) break;
-		isJumping = true; 
+		// Allow jumping in sitting state
 		if (isOnPlatform)
 		{
 			if (abs(this->vx) == MARIO_RUNNING_SPEED)
@@ -281,27 +293,28 @@ void CMario::SetState(int state)
 		break;
 
 	case MARIO_STATE_RELEASE_JUMP:
-		isJumping = false; 
 		if (vy < 0) vy += MARIO_JUMP_SPEED_Y / 2;
 		break;
 
 	case MARIO_STATE_SIT:
-		if (isRunning) break;
+		if (isRunning && isOnPlatform) break;
 		if (isOnPlatform && level != MARIO_LEVEL_SMALL)
 		{
 			state = MARIO_STATE_IDLE;
 			isSitting = true;
 			vx = 0; vy = 0.0f;
-			y +=MARIO_SIT_HEIGHT_ADJUST;
+			if (!isSitting)
+				y += MARIO_SIT_HEIGHT_ADJUST;
 		}
 		break;
 
 	case MARIO_STATE_SIT_RELEASE:
-		if (isSitting)
+		if (isSitting && isOnPlatform)
 		{
 			isSitting = false;
 			state = MARIO_STATE_IDLE;
-			y -= MARIO_SIT_HEIGHT_ADJUST;
+			if (!isSitting)
+				y -= MARIO_SIT_HEIGHT_ADJUST;
 		}
 		break;
 

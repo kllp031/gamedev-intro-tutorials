@@ -36,9 +36,16 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
 	switch (KeyCode)
 	{
-
+	case DIK_RIGHT:
+	case DIK_LEFT:
+		if (CGame::GetInstance()->IsKeyDown(DIK_DOWN))
+			mario->SetState(MARIO_STATE_SIT);
+		break;  // Add this break to prevent fall-through to DIK_S
 	case DIK_S:
 		mario->SetState(MARIO_STATE_RELEASE_JUMP);
+		// Check if down key is pressed when jump key is released
+		if (CGame::GetInstance()->IsKeyDown(DIK_DOWN))
+			mario->SetState(MARIO_STATE_SIT);
 		break;
 	case DIK_DOWN:
 		mario->SetState(MARIO_STATE_SIT_RELEASE);
@@ -46,10 +53,12 @@ void CSampleKeyHandler::OnKeyUp(int KeyCode)
 	}
 }
 
-void CSampleKeyHandler::KeyState(BYTE *states)
+
+void CSampleKeyHandler::KeyState(BYTE* states)
 {
 	CGame* game = CGame::GetInstance();
 
+	// Handle movement even when sitting
 	if (game->IsKeyDown(DIK_RIGHT))
 	{
 		if (game->IsKeyDown(DIK_A))
@@ -67,3 +76,4 @@ void CSampleKeyHandler::KeyState(BYTE *states)
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }
+

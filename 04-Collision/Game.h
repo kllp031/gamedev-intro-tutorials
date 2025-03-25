@@ -71,6 +71,7 @@ public:
 	// Keyboard related functions 
 	void InitKeyboard(LPKEYEVENTHANDLER handler);
 	int IsKeyDown(int KeyCode);
+	int IsKeyUp(int KeyCode);
 	void ProcessKeyboard();
 
 	ID3D10Device* GetDirect3DDevice() { return this->pD3DDevice; }

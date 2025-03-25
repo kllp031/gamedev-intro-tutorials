@@ -128,7 +128,6 @@ public:
 	CMario(float x, float y) : CGameObject(x, y)
 	{
 		isSitting = false;
-		isJumping = false;
 		isRunning = false;
 		maxVx = 0.0f;
 		ax = 0.0f;
@@ -143,6 +142,9 @@ public:
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render();
 	void SetState(int state);
+
+	bool IsSitting() { return isSitting; }
+	bool IsOnPlatform() { return isOnPlatform; }
 
 	int IsCollidable()
 	{ 
